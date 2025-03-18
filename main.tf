@@ -16,7 +16,7 @@ provider "spacelift" {
 }
 
 provider "aws" {
-  region = "us-east-1" # Change to your preferred region
+  region = "us-east-1" # Change as needed
 }
 
 # Fetch AWS Account ID from input
@@ -43,21 +43,14 @@ data "aws_iam_role" "spacelift_role" {
   name = "Spacelift"
 }
 
-# Update the IAM Role Trust Policy
-resource "aws_iam_role_policy" "trust_policy" {
-  name = "SpaceliftTrustPolicy"
+# Update the IAM Role's Assume Role Policy
+resource "aws_iam_role_policy" "spacelift_assume_role_policy" {
   role = data.aws_iam_role.spacelift_role.name
+  name = "SpaceliftAssumeRolePolicy"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${var.aws_account_id}:root"
-        }
-        Action = "sts:AssumeRole"
-      },
       {
         Effect = "Allow"
         Principal = {
