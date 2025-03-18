@@ -43,16 +43,10 @@ data "aws_iam_role" "spacelift_role" {
   name = "Spacelift"
 }
 
-# Update the Assume Role Policy of the existing IAM Role
-resource "aws_iam_role_policy_attachment" "spacelift_trust_policy" {
-  role       = data.aws_iam_role.spacelift_role.name
-  policy_arn = aws_iam_policy.spacelift_assume_role_policy.arn
-}
-
-# Define the IAM Policy for Spacelift to assume the role
-resource "aws_iam_policy" "spacelift_assume_role_policy" {
-  name        = "SpaceliftAssumeRolePolicy"
-  description = "Policy allowing Spacelift to assume the role"
+# ✅ Update the Assume Role Policy of the existing IAM Role
+resource "aws_iam_role_policy" "spacelift_trust_policy" {
+  role = data.aws_iam_role.spacelift_role.name
+  name = "SpaceliftTrustPolicy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -60,7 +54,7 @@ resource "aws_iam_policy" "spacelift_assume_role_policy" {
       {
         Effect = "Allow"
         Principal = {
-          Service = "spacelift.io"
+          AWS = "arn:aws:iam::${var.aws_account_id}:root"
         }
         Action = "sts:AssumeRole"
       }
