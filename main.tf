@@ -25,7 +25,7 @@ variable "aws_account_id" {
   type        = string
 }
 
-# Fetch Stack Name (used as stack_id) - Fixed syntax error
+# Fetch Stack Name (used as stack_id)
 variable "stack_name" {
   description = "Spacelift Stack Name"
   type        = string
@@ -38,7 +38,7 @@ resource "spacelift_aws_integration" "aws_integration" {
   generate_credentials_in_worker = false
 }
 
-# Fetch the existing IAM Role and update its trust policy
+# Update the trust policy of an existing IAM Role named "Spacelift"
 resource "aws_iam_role" "spacelift_role" {
   name = "Spacelift"
 
@@ -50,4 +50,12 @@ resource "aws_iam_role" "spacelift_role" {
         Principal = {
           AWS = "arn:aws:iam::${var.aws_account_id}:root"
         }
-    
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  lifecycle {
+    ignore_changes = [name] # Prevent accidental recreation
+  }
+}
