@@ -44,14 +44,18 @@ resource "aws_iam_role" "spacelift_role" {
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${var.aws_account_id}:root"
-        }
-        Action = "sts:AssumeRole"
-      }
+    Statement = [{
+  "Action": "sts:AssumeRole",
+  "Condition": {
+    "StringEquals": {
+      "sts:ExternalId": "zuplon@01JPMH1QMWAHC348V7H1M8XBV9@avinash_prompt3-2@write"
+    }
+  },
+  "Effect": "Allow",
+  "Principal": {
+    "AWS": "324880187172"
+  }
+}
     ]
   })
 
