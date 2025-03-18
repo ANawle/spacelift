@@ -28,31 +28,4 @@ variable "aws_account_id" {
 # Fetch Stack Name (used as stack_id)
 variable "stack_name" {
   description = "Spacelift Stack Name"
-  type        = string
-}
-
-# Create an AWS integration in Spacelift
-resource "spacelift_aws_integration" "aws_integration" {
-  name                           = "aws-integration-${var.aws_account_id}"
-  role_arn                       = aws_iam_role.spacelift_role.arn
-  generate_credentials_in_worker = false
-}
-
-# Fetch existing IAM Role or create if missing
-resource "aws_iam_role" "spacelift_role" {
-  name = "Spacelift"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${var.aws_account_id}:root"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
+  type   
