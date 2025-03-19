@@ -12,54 +12,57 @@ terraform {
 }
 
 provider "spacelift" {
-  # Spacelift API credentials (configured via environment variables)
+  # Uses Spacelift API credentials (set via environment variables)
 }
 
 provider "aws" {
   region = "us-east-1" # Change as needed
 }
 
-# Fetch AWS Account ID from input
+# 🔹 Input Variables for AWS Account and Stack Name
 variable "aws_account_id" {
   description = "AWS Account ID for integration"
   type        = string
 }
 
-# Fetch Stack Name (used as stack_id)
 variable "stack_name" {
   description = "Spacelift Stack Name"
   type        = string
 }
 
-# Create an AWS integration in Spacelift
+# 🔹 Create a Spacelift Stack
+resource "spacelift_stack" "stack" {
+  name         = var.stack_name
+  repository   = "your-repo-name"  # Change this to your repo
+  branch       = "main"
+  description  = "Spacelift Stack for ${var.stack_name}"
+}
+
+# 🔹 Create an AWS Integration in Spacelift
 resource "spacelift_aws_integration" "aws_integration" {
   name                           = "aws-integration-${var.aws_account_id}"
   role_arn                       = aws_iam_role.spacelift_role.arn
   generate_credentials_in_worker = false
+  stack_id                       = spacelift_stack.stack.id  # Attaches to Stack
 }
 
-# Update the trust policy of an existing IAM Role named "Spacelift"
+# 🔹 IAM Role for Spacelift (Already Exists, Just Updating Trust Policy)
 resource "aws_iam_role" "spacelift_role" {
   name = "Spacelift"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-  "Action": "sts:AssumeRole",
-  "Condition": {
-    "StringEquals": {
-      "sts:ExternalId": "zuplon@01JPMH1QMWAHC348V7H1M8XBV9@avinash_prompt3-2@write"
-    }
-  },
-  "Effect": "Allow",
-  "Principal": {
-    "AWS": "324880187172"
-  }
-}
+    Statement = [
+      {
+        "Effect": "Allow",
+        "Principal": { "AWS": "094693243018" }, # Spacelift AWS Account ID
+        "Action": "sts:AssumeRole",
+        "Condition": {
+          "StringEquals": {
+            "sts:ExternalId": spacelift_stack.stack.id # Fetching Stack ID Automatically
+          }
+        }
+      }
     ]
   })
-
-  lifecycle {
-    ignore_changes = [name] # Prevent accidental recreation
-  }
 }
